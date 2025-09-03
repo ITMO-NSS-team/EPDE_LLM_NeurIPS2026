@@ -1,11 +1,12 @@
 import epde.interface.interface as epde
+from epde.interface.prepared_tokens import CustomTokens, CustomEvaluator
 from epde.interface.equation_translator import translate_equation
 from epde_integration.hyperparameters import epde_params
 from pipeline.epde_translator.sol_track_translator import SolTrackTranslator
 import time
 from epde_eq_parse.eq_evaluator import evaluate_fronts, FrontReranker
 from epde_eq_parse.eq_parser import clean_parsed_out
-
+import numpy as np
 
 def get_epde_search_obj(grids, dir_name, device='cpu'):
     epde_search_obj = epde.EpdeSearch(use_solver=False,
@@ -52,7 +53,7 @@ class EpdeSearcher(object):
             self.initialize_population()
 
         terms_max_num = max(epde_params[self._dir_name]['equation_terms_max_number'], self.llm_pool.terms_max_num)
-        factors_max_num = max(epde_params[self._dir_name]['equation_factors_max_number'], self.llm_pool.factors_max_num)
+        factors_max_num = epde_params[self._dir_name]['equation_factors_max_number']
 
         i = 0
         clean_parsed_out(self._dir_name)
@@ -78,7 +79,7 @@ class EpdeSearcher(object):
             # run_eq_info += iter_info
 
             front_r = FrontReranker(iter_info)
-            run_eq_info.append(front_r.select_best())
+            run_eq_info.append(front_r.select_best('shd'))
 
             print('Overall time is, s:', end-start)
             print(f'Iterations processed: {i + 1}/{self.__max_iter}\n')
@@ -101,6 +102,7 @@ class EpdeSearcher(object):
 
     def initialize_population(self):
         self.population = []
+
         self.epde_search_obj.create_pool(data=self.u,
                                          max_deriv_order=self.__get_max_deriv_order(),
                                          additional_tokens=self.__get_additional_tokens(),
@@ -109,6 +111,45 @@ class EpdeSearcher(object):
                                          deriv_fun_pow=max(1, self.llm_pool.max_deriv_pow['deriv_fun_pow']),
                                          derivs=None)
 
+        max_terms_number = max(epde_params[self._dir_name]['equation_terms_max_number'], self.llm_pool.terms_max_num)
+        min_terms_number = np.inf
+        extra_tokens = []
         for i, eq_u in enumerate(self.__eq_epde_str):
             soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
+            if soeqs.metaparameters["terms_number"]["value"] > max_terms_number:
+                max_terms_number = soeqs.metaparameters["terms_number"]["value"]
+            if soeqs.metaparameters["terms_number"]["value"] < min_terms_number:
+                min_terms_number = soeqs.metaparameters["terms_number"]["value"]
+
+        for i in range(max_terms_number - min_terms_number):
+            custom_noise_eval_fun = {
+                f'noise_mu0_std1_{i}': lambda *grids, **kwargs: np.random.normal() ** kwargs['power']}
+            custom_noise_evaluator = CustomEvaluator(custom_noise_eval_fun, eval_fun_params_labels=['power'])
+            params_ranges = {'power': (1, 1)}
+            trig_params_equal_ranges = {}
+
+            custom_trig_tokens = CustomTokens(token_type=f'noise{i}',
+                                              token_labels=[f'noise_mu0_std1_{i}'],
+                                              evaluator=custom_noise_evaluator,
+                                              params_ranges=params_ranges,
+                                              meaningful=True, unique_token_type=False)
+
+            extra_tokens.append(custom_trig_tokens)
+
+        if max_terms_number != min_terms_number:
+            self.epde_search_obj.create_pool(data=self.u,
+                                             max_deriv_order=self.__get_max_deriv_order(),
+                                             additional_tokens=self.__get_additional_tokens() + extra_tokens,
+                                             data_fun_pow=max(epde_params[self._dir_name]['data_fun_pow'],
+                                                              self.llm_pool.max_deriv_pow['data_fun_pow']),
+                                             deriv_fun_pow=max(1, self.llm_pool.max_deriv_pow['deriv_fun_pow']),
+                                             derivs=None)
+
+        for i, eq_u in enumerate(self.__eq_epde_str):
+            soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
+            if soeqs.metaparameters["terms_number"]["value"] < max_terms_number:
+                for j in range(max_terms_number - soeqs.metaparameters["terms_number"]["value"]):
+                    eq_u = "0.0 * " + extra_tokens[j].token_family.tokens[0] + "{power: 1.0} + " + eq_u
+                soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
+
             self.population.append(soeqs)
