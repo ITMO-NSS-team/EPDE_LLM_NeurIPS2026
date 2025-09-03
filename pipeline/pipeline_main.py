@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.append(str(Path().absolute().parent) + '\\EPDE')
+sys.path.append(str(Path().absolute().parent))
 from pipeline.optimization_workflow.optimization_manager import OptManager
 from epde_struct_evaluator.epde_struct_evaluator import TrackEvaluator
 from epde_eq_parse.eq_evaluator import EqReranker
@@ -11,11 +15,11 @@ start_iter = 0
 refine_point = 100
 
 data_args = {"resample_shape": (20, 20),
-             "use_cached": True,
+             "use_cached": False,
              "noise_level": 0,
-             "dir_name": "burg_sindy"}
+             "dir_name": "burg"}
 
-debug = True # True False
+debug = False # True False
 print_exc = True
 exit_code = False
 

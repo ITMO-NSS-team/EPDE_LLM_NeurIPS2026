@@ -1,11 +1,13 @@
+import sys
 import os
+from pathlib import Path
+sys.path.append(str(Path().absolute().parent) + '\\EPDE')
+sys.path.append(str(Path().absolute().parent))
 import time
 import numpy as np
 from epde.interface.interface import EpdeSearch
 import pandas as pd
-from pathlib import Path
 from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker, FrontReranker
-
 
 def noise_data(data, noise_level):
     # add noise level to the input data

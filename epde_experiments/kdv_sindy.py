@@ -1,4 +1,8 @@
+import sys
 import os
+from pathlib import Path
+sys.path.append(str(Path().absolute().parent) + '\\EPDE')
+sys.path.append(str(Path().absolute().parent))
 from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker, FrontReranker
 import numpy as np
 import time

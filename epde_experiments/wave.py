@@ -1,5 +1,8 @@
 import sys
-sys.path.append("./EPDE/epde")
+import os
+from pathlib import Path
+sys.path.append(str(Path().absolute().parent) + '\\EPDE')
+sys.path.append(str(Path().absolute().parent))
 import time
 import numpy as np
 import pandas as pd
@@ -11,7 +14,6 @@ rcParams.update({'figure.autolayout': True})
 import traceback
 import logging
 import os
-from pathlib import Path
 from epde_integration.hyperparameters import epde_params
 from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker
 from epde_eq_parse.eq_parser import clean_parsed_out

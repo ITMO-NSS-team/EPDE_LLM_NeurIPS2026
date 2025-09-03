@@ -1,8 +1,11 @@
+import sys
 import os
+from pathlib import Path
+sys.path.append(str(Path().absolute().parent) + '\\EPDE')
+sys.path.append(str(Path().absolute().parent))
 import numpy as np
 from epde.interface.interface import EpdeSearch
 import pandas as pd
-from pathlib import Path
 from scipy.io import loadmat
 
 
@@ -10,7 +13,7 @@ PARENT_PATH = Path(os.path.dirname(__file__)).parent
 
 def noise_data(data, noise_level):
     # add noise level to the input data
-    return noise_level * 0.01 * np.std(data) * np.random.normal(size=data.shape) + data
+    return noise_level * np.std(data) * np.random.normal(size=data.shape) + data
 
 def get_data(dataset):
     if dataset == "burg":
@@ -91,15 +94,15 @@ def gen_derivs(noise_level, dataset, i=None):
     if noise_level == 0:
         for i in range(t_deriv_order):
             if i == 0:
-                np.save(os.path.join(full_path, "du_dx1"), derivs['u'][:, i])
+                np.save(os.path.join(full_path, "du_dx1"), derivs['u'][:, i].reshape(data.shape))
             else:
-                np.save(os.path.join(full_path, f"d^{i+1}u_dx1^{i+1}"), derivs['u'][:, i])
+                np.save(os.path.join(full_path, f"d^{i+1}u_dx1^{i+1}"), derivs['u'][:, i].reshape(data.shape))
 
         for i in range(x_deriv_order):
             if i == 0:
-                np.save(os.path.join(full_path, "du_dx2"), derivs['u'][:, i + t_deriv_order])
+                np.save(os.path.join(full_path, "du_dx2"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
             else:
-                np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order])
+                np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
     else:
         for i in range(t_deriv_order):
             if i == 0:
@@ -114,7 +117,7 @@ def gen_derivs(noise_level, dataset, i=None):
                 np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
 
 if __name__ == "__main__":
-    noise_level = 10
+    noise_level = 0
     single = True
     iters = 30
     datasets = ["burg", "burg_sindy", "kdv_sindy", "wave"]
