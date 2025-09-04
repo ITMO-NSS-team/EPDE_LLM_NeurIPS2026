@@ -1,6 +1,6 @@
 # EPDE-LLM: Equation Discovery with Large Language Models
 
-We formulate fifferential equation discovery as a code-generation task for Large Language Models (LLMs). This repository introduces a compact, physics-preserving textual representation for fields and their derivatives, and integrates LLMs as oracles within an Evolutionary PDE Discovery (EPDE) meta-learning loop.
+We formulate differential equation discovery as a code-generation task for Large Language Models (LLMs). This repository introduces a compact, physics-preserving textual representation for fields and their derivatives, and integrates LLMs as oracles within an Evolutionary PDE Discovery (EPDE) meta-learning loop.
 
 ## Overview
 
