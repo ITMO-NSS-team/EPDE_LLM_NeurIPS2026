@@ -41,17 +41,17 @@ Discovering the underlying equations from observed data is a fundamental scienti
    
     Create creds.py file with API key in it. Use creds_example.py as an example.
 
-## Basic Usage
+## Basic usage
 
 The following example shows how to use EPDE-LLM.
 
-### Step 1: Generate Data
+### Step 1: Generate data
 First, generate the necessary data for the LLM to process:
 ```bash
 cd data
 python data_gen.py
 ```
-### Step 2: Choose Your Approach
+### Step 2: Choose your approach
 
 There are three main approaches to experiment with:
 
