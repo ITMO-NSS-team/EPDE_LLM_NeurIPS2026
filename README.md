@@ -56,12 +56,18 @@ python data_gen.py
 There are three main approaches to experiment with:
 
 #### Option 1. LLM as equation discovery tool:
+
+Uses generative symbolic reasoning where the LLM directly proposes equation structures based on the data representation.
+
 ```bash
 cd pipeline
 python pipeline_main.py
 ```
 
 #### Option 2. EPDE baseline experiments:
+
+The EPDE framework optimizes equation structures through evolutionary principles, treating each equation as an individual subject to mutation and crossover.
+
 ```bash
 cd epde_experiments
 python burgers.py 
@@ -69,6 +75,9 @@ python burgers.py
 ```
 
 #### Option 3. EPDE-LLM framework experiments:
+
+A hybrid approach where the LLM first generates an initial population of candidate equations, which is then refined by the EPDE algorithm using its evolutionary operations for optimal convergence.
+
 ```bash
 cd epde_llm
 python epde_llm_main.py
