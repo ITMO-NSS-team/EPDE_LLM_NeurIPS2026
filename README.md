@@ -45,20 +45,30 @@ Discovering the underlying equations from observed data is a fundamental scienti
 
 The following example shows how to use EPDE-LLM.
 
-1. LLM as equation discovery tool:
+### Step 1: Generate Data
+First, generate the necessary data for the LLM to process:
+```bash
+cd data
+python data_gen.py
+```
+### Step 2: Choose Your Approach
+
+There are three main approaches to experiment with:
+
+#### Option 1. LLM as equation discovery tool:
 ```bash
 cd pipeline
 python pipeline_main.py
 ```
 
-2. EPDE baseline experiments:
+#### Option 2. EPDE baseline experiments:
 ```bash
 cd epde_experiments
 python burgers.py 
 # Other examples: kdv_sindy.py, wave.py, etc.
 ```
 
-3. EPDE-LLM framework experiments:
+#### Option 3. EPDE-LLM framework experiments:
 ```bash
 cd epde_llm
 python epde_llm_main.py
