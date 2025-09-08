@@ -8,6 +8,7 @@ import numpy as np
 from epde.interface.interface import EpdeSearch
 from scipy.io import loadmat
 from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker, FrontReranker
+from epde_integration.hyperparameters import epde_params
 
 
 def noise_data(data, noise_level):
@@ -31,16 +32,28 @@ def burgers_discovery(noise_level, epochs):
     experiment_info = "noise_" + str(noise_level) + "_epochs_" + str(epochs)
     grid, data = burgers_data()
 
+    params = epde_params[dir_name]
+    
+    use_solver = params["use_solver"]
+    use_pic = params["use_pic"]
+    bounds = params["boundary"]
 
-    factors_max_number = {'factors_num': [1, 2], 'probas': [0.65, 0.35]}
-    bounds = (1e-5, 1e0)
+    population_size = params["population_size"]
+    training_epochs = params["training_epochs"]
+
+    max_deriv_order = params["max_deriv_order"]
+    equation_terms_max_number = params["equation_terms_max_number"]
+    data_fun_pow = params["data_fun_pow"]
+    additional_tokens = params["additional_tokens"]
+    equation_factors_max_number = params["equation_factors_max_number"]
+    eq_sparsity_interval = params["eq_sparsity_interval"]
 
     i, max_iter_number = 0, 30
     run_eq_info = []
     while i < max_iter_number:
         noised_data = noise_data(data, noise_level)
 
-        epde_search_obj = EpdeSearch(use_solver=False, use_pic=True, boundary=20,
+        epde_search_obj = EpdeSearch(use_solver=use_solver, use_pic=use_pic, boundary=bounds,
                                      coordinate_tensors=grid, device='cuda')
 
         if noise_level == 0:
@@ -49,18 +62,16 @@ def burgers_discovery(noise_level, epochs):
         else:
             epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
                                              preprocessor_kwargs={"use_smoothing": True})
-
-        popsize = 8
-
-        epde_search_obj.set_moeadd_params(population_size=popsize,
-                                          training_epochs=epochs)
+            
+        epde_search_obj.set_moeadd_params(population_size=population_size,
+                                          training_epochs=training_epochs)
 
         start = time.time()
-        epde_search_obj.fit(data=noised_data, variable_names=['u', ], max_deriv_order=(2, 3), derivs=None,
-                            equation_terms_max_number=5, data_fun_pow=3,
-                            additional_tokens=[],
-                            equation_factors_max_number=factors_max_number,
-                            eq_sparsity_interval=bounds, fourier_layers=False) #
+        epde_search_obj.fit(data=noised_data, variable_names=['u', ], max_deriv_order=max_deriv_order,
+                            equation_terms_max_number=equation_terms_max_number, data_fun_pow=data_fun_pow,
+                            additional_tokens=additional_tokens,
+                            equation_factors_max_number=equation_factors_max_number,
+                            eq_sparsity_interval=eq_sparsity_interval)  #
         end = time.time()
 
         epde_search_obj.equations(only_print=True, num=1)
