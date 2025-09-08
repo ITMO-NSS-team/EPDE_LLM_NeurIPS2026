@@ -70,16 +70,17 @@ class EqEvaluator(object):
         return shd
 
     def eval_mae_norm(self, eval_incorrect_eq=False):
-        if set(self.terms_with_coeffs.keys()) == set(self.correct_coeffs.keys()):
-            mae1, mae2 = 0.0, 0.0
-            for key in self.terms_with_coeffs.keys():
+        mae1, mae2 = 0.0, 0.0
+        for key in self.terms_with_coeffs.keys():
+            if key in set(self.correct_coeffs.keys()):
                 if self.correct_coeffs[key] != 0:
                     mae1 += np.fabs(self.correct_coeffs[key] - self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
                     mae2 += np.fabs(-self.correct_coeffs[key] - self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
-            mae = min(mae1, mae2)
-            return mae / len(self.terms_with_coeffs)
-
-        return None
+            else:
+                mae1 += np.fabs(self.terms_with_coeffs[key]) / 1e-8
+                mae2 += np.fabs(-self.terms_with_coeffs[key]) / 1e-8
+        mae = min(mae1, mae2)
+        return mae / len(self.terms_with_coeffs)
 
 class FrontReranker(object):
     def __init__(self, iter_info: list[EqInfo]):
