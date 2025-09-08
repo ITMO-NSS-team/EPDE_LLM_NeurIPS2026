@@ -9,7 +9,7 @@ from epde_eq_parse.eq_parser import clean_parsed_out
 import numpy as np
 
 def get_epde_search_obj(grids, dir_name, device='cpu'):
-    epde_search_obj = epde.EpdeSearch(use_solver=False,
+    epde_search_obj = epde.EpdeSearch(use_solver=epde_params[dir_name]['use_solver'],
                                       use_pic=epde_params[dir_name]['use_pic'],
                                       boundary=epde_params[dir_name]['boundary'],
                                       coordinate_tensors=grids, verbose_params={'show_iter_idx': True},
@@ -18,15 +18,14 @@ def get_epde_search_obj(grids, dir_name, device='cpu'):
     epde_search_obj.set_moeadd_params(population_size=epde_params[dir_name]['population_size'],
                                       training_epochs=epde_params[dir_name]['training_epochs'])
 
-    epde_search_obj.set_preprocessor(default_preprocessor_type='FD',
-                                     preprocessor_kwargs={})
     return epde_search_obj
 
 
 class EpdeSearcher(object):
     # если нужны деривы, то передать вот тут в инит
     def __init__(self, data: list, record_track: dict, pruned_track: dict, dir_name: str,
-                 use_init_population=True, max_iter_num=1, device: str = 'cpu'):
+                 use_init_population=True, max_iter_num=1, device: str = 'cpu', noise_level=0):
+        self.noise_level = noise_level
         self.__max_iter = max_iter_num
         self.use_init_population = use_init_population
         self.u = data[2]
@@ -99,6 +98,12 @@ class EpdeSearcher(object):
     def initialize_epde_search_obj(self):
         if self.epde_search_obj is None:
             self.epde_search_obj = get_epde_search_obj(self.grids, self._dir_name, self._device)
+            if self.noise_level == 0:
+                self.epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
+                                                preprocessor_kwargs={})
+            else:
+                self.epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
+                                                preprocessor_kwargs={"use_smoothing": True})
 
     def initialize_population(self):
         self.population = []
