@@ -83,7 +83,7 @@ class EpdeSearcher(object):
             print('Overall time is, s:', end-start)
             print(f'Iterations processed: {i + 1}/{self.__max_iter}\n')
             i += 1
-        return run_eq_info
+        return run_eq_info[0]
 
     def __get_additional_tokens(self):
         if len(self.__additional_classes) == 0 and epde_params[self._dir_name]['additional_tokens'] is None:

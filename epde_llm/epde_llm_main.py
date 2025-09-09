@@ -14,14 +14,14 @@ llm_iter_num = 0
 max_iter = 6
 start_iter = 0
 refine_point = 100
-epde_llm_iterations = 30
+epde_llm_iterations = 2
 
 debug = False # True False
 print_exc = True
-exit_code = True
+exit_code = False
 
 data_args = {"resample_shape": (20, 20),
-             "use_cached": True,
+             "use_cached": False,
              "noise_level": 0,
              "dir_name": "wave"}
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     eq_r = EqReranker(run_eq_info, dir_name)
     eq_r.best_run_inf = run_eq_info
     # best_info = eq_r.select_best('shd')
-    eq_r.to_csv(package="epde_experiments", experiment_info=experiment_info)
+    eq_r.to_csv(package="epde_llm", experiment_info=experiment_info)
 
     # 'd^2u/dt^2 = c[0] * du/dx + c[1]*x + c[2]'
     # 'd^2u/dt^2 = .000423725096 * du/dx + 0.0170837104*x + -1.05863540'
