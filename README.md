@@ -15,8 +15,8 @@ Discovering the underlying equations from observed data is a fundamental scienti
 
 ## Prerequisites
 
-*   Python 3.11
-*   Conda (recommended) or pip
+*   Python 3.9
+*   Conda or pip
 *   An API key for the LLM service you wish to use (e.g., OpenAI, Anthropic) - *if using a proprietary model*
 
 ## Installation
@@ -28,12 +28,13 @@ Discovering the underlying equations from observed data is a fundamental scienti
 
 2.  **Create and activate a Conda environment:**
     ```bash
-    conda create -n epde_llm python=3.11 -y
+    conda create -n epde_llm python=3.9 -y
     conda activate epde_llm
     ```
 
 3.  **Install the required dependencies:**
     ```bash
+    pip install torch==2.3.1+cu118 torchvision==0.18.1+cu118 torchaudio==2.3.1+cu118 -f https://download.pytorch.org/whl/cu118/torch_stable.html
     pip install -r requirements.txt
     ```
 
