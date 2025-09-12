@@ -11,6 +11,19 @@ class WaveSch(object):
     params = [correct_params1, correct_params2, correct_params3, correct_params4]
 
 
+class OdeSch(object):
+    """
+    Static class to store wave equation schema and parameters.
+    """
+    left_side = 'du/dx0'
+    schema = frozenset({'du/dx0', 'u', 'x_0', 'd^2u/dx0^2', 'C'})
+    correct_params1 = {'du/dx0': -1.0, 'u': 4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
+    correct_params2 = {'du/dx0': 1.0, 'u': -4.0, 'x_0': -1.5, 'd^2u/dx0^2': 1.0, 'C': 0.0}
+    # correct_params3 = {'du/dx0': -1.0, 'u': 4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
+    # correct_params4 = {'du/dx0': -1.0, 'u': 4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
+    params = [correct_params1, correct_params2] # , correct_params3, correct_params4
+
+
 class BurgSch(object):
     left_side = 'du/dx0'
     schema = frozenset({'du/dx0', 'u * du/dx1', 'C'})
@@ -52,6 +65,10 @@ class KdvSch(object):
 schemas = {'wave': {'schema': WaveSch.schema,
                     'params': WaveSch.params,
                     'left_side': WaveSch.left_side,},
+
+           'ode': {'schema': OdeSch.schema,
+                    'params': OdeSch.params,
+                    'left_side': OdeSch.left_side,},
 
            'burg_sindy': {'schema': BurgSindySch.schema,
                           'params': BurgSindySch.params,

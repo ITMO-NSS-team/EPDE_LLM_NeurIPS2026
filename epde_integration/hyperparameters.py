@@ -1,5 +1,6 @@
 from epde.evaluators import CustomEvaluator
 from epde.interface.prepared_tokens import CustomTokens
+from epde import TrigonometricTokens, GridTokens, CacheStoredTokens
 import numpy as np
 
 
@@ -17,13 +18,15 @@ custom_trig_tokens = CustomTokens(token_type='trigonometric',
                                   params_equality_ranges=trig_params_equal_ranges,
                                   meaningful=True, unique_token_type=False)
 
+grid_tokens = GridTokens(['x_0', ], dimensionality=0, max_power=2)
+
 epde_params = {
     'burg': {'boundary': (20, 20),
              'population_size': 8,
              'training_epochs': 5,
              'max_deriv_order': (2, 3),
              'equation_terms_max_number': 5,
-             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.9, 0.1]},
+             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.8, 0.2]},
              'eq_sparsity_interval': (1e-6, 1e-5),
              'num': 1,
              'additional_tokens': None,
@@ -37,7 +40,7 @@ epde_params = {
              'training_epochs': 5,
              'max_deriv_order': (2, 3),
              'equation_terms_max_number': 5,
-             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.9, 0.1]},
+             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.8, 0.2]},
              'eq_sparsity_interval': (1e-6, 1e-5),
              'num': 1,
              'additional_tokens': None,
@@ -51,7 +54,7 @@ epde_params = {
              'training_epochs': 5,
              'max_deriv_order': (2, 3),
              'equation_terms_max_number': 5,
-             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.9, 0.1]},
+             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.8, 0.2]},
              'eq_sparsity_interval': (1e-6, 1e-5),
              'num': 1,
              'additional_tokens': None,
@@ -65,7 +68,7 @@ epde_params = {
              'training_epochs': 5,
              'max_deriv_order': (2, 3),
              'equation_terms_max_number': 5,
-             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.9, 0.1]},
+             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.8, 0.2]},
              'eq_sparsity_interval': (1e-6, 1e-5),
              'num': 1,
              'additional_tokens': None,
@@ -79,10 +82,24 @@ epde_params = {
              'training_epochs': 5,
              'max_deriv_order': (2, 3),
              'equation_terms_max_number': 5,
-             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.9, 0.1]},
+             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.8, 0.2]},
              'eq_sparsity_interval': (1e-6, 1e-5),
              'num': 1,
              'additional_tokens': None,
+             "use_solver": False,
+             "use_pic": True,
+             "data_fun_pow": 3,
+             "fourier_layers": True},
+
+    'ode': {'boundary': (60),
+             'population_size': 8,
+             'training_epochs': 5,
+             'max_deriv_order': (2),
+             'equation_terms_max_number': 5,
+             'equation_factors_max_number': {'factors_num': [1, 2], 'probas': [0.8, 0.2]},
+             'eq_sparsity_interval': (1e-6, 1e-5),
+             'num': 1,
+             'additional_tokens': [grid_tokens],
              "use_solver": False,
              "use_pic": True,
              "data_fun_pow": 3,
