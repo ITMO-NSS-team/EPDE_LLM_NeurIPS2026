@@ -43,7 +43,8 @@ class Data(object):
 
         raw_data = {}
         for i, file in enumerate(files):
-            raw_data[keys[i]] = np.load(os.path.join(self.dir_path, file))
+            if file != "ds.npy":
+                raw_data[keys[i]] = np.load(os.path.join(self.dir_path, file))
 
         if self.bounds is not None:
             t = np.linspace(self.bounds[0][0], self.bounds[0][1], raw_data['u'].shape[0])
