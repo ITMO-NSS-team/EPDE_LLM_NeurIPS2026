@@ -40,6 +40,7 @@ class EpdeSearcher(object):
 
         self.epde_search_obj = None
         self.population = None
+        self.pool = None
 
     def __get_max_deriv_order(self):
         max_t = max(epde_params[self._dir_name]['max_deriv_order'][0], self.llm_pool.max_deriv_orders['max_deriv_t'])
@@ -70,7 +71,7 @@ class EpdeSearcher(object):
                                                       self.llm_pool.max_deriv_pow['data_fun_pow']),
                                      deriv_fun_pow=max(1, self.llm_pool.max_deriv_pow['deriv_fun_pow']),
                                      population=self.population,
-                                     fourier_layers=epde_params[self._dir_name]['fourier_layers'])
+                                     fourier_layers=epde_params[self._dir_name]['fourier_layers'], pool=self.epde_search_obj.pool)
             end = time.time()
             self.epde_search_obj.equations(only_print=True, only_str=False, num=epde_params[self._dir_name]['num'])
             res = self.epde_search_obj.equations(only_print=False, only_str=False, num=epde_params[self._dir_name]['num'])
@@ -107,14 +108,14 @@ class EpdeSearcher(object):
 
     def initialize_population(self):
         self.population = []
-
+        derivs = np.load(f'../data/noise_level_{self.noise_level}/{self._dir_name}/ds.npy', allow_pickle=True)
         self.epde_search_obj.create_pool(data=self.u,
                                          max_deriv_order=self.__get_max_deriv_order(),
                                          additional_tokens=self.__get_additional_tokens(),
                                          data_fun_pow=max(epde_params[self._dir_name]['data_fun_pow'],
                                                           self.llm_pool.max_deriv_pow['data_fun_pow']),
                                          deriv_fun_pow=max(1, self.llm_pool.max_deriv_pow['deriv_fun_pow']),
-                                         derivs=None)
+                                         derivs=derivs)
 
         max_terms_number = max(epde_params[self._dir_name]['equation_terms_max_number'], self.llm_pool.terms_max_num)
         min_terms_number = np.inf
@@ -128,13 +129,13 @@ class EpdeSearcher(object):
 
         for i in range(max_terms_number - min_terms_number):
             custom_noise_eval_fun = {
-                f'noise_mu0_std1_{i}': lambda *grids, **kwargs: np.random.normal() ** kwargs['power']}
+                f'noise_term_{i}': lambda *grids, **kwargs: np.random.normal() ** kwargs['power']}
             custom_noise_evaluator = CustomEvaluator(custom_noise_eval_fun, eval_fun_params_labels=['power'])
             params_ranges = {'power': (1, 1)}
             trig_params_equal_ranges = {}
 
-            custom_trig_tokens = CustomTokens(token_type=f'noise{i}',
-                                              token_labels=[f'noise_mu0_std1_{i}'],
+            custom_trig_tokens = CustomTokens(token_type=f'noise_{i}',
+                                              token_labels=[f'noise_term_{i}'],
                                               evaluator=custom_noise_evaluator,
                                               params_ranges=params_ranges,
                                               meaningful=True, unique_token_type=False)
@@ -148,7 +149,7 @@ class EpdeSearcher(object):
                                              data_fun_pow=max(epde_params[self._dir_name]['data_fun_pow'],
                                                               self.llm_pool.max_deriv_pow['data_fun_pow']),
                                              deriv_fun_pow=max(1, self.llm_pool.max_deriv_pow['deriv_fun_pow']),
-                                             derivs=None)
+                                             derivs=derivs)
 
         for i, eq_u in enumerate(self.__eq_epde_str):
             soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
