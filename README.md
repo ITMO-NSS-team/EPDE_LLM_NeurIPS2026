@@ -46,13 +46,7 @@ Discovering the underlying equations from observed data is a fundamental scienti
 
 The following example shows how to use EPDE-LLM.
 
-### Step 1: Generate data
-First, generate the necessary data for the LLM to process:
-```bash
-cd data
-python data_gen.py
-```
-### Step 2: Choose your approach
+### Choose your approach
 
 There are three main approaches to experiment with:
 
