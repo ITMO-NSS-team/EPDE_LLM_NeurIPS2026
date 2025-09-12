@@ -9,6 +9,7 @@ from epde.interface.interface import EpdeSearch
 import pandas as pd
 from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker, FrontReranker
 from epde_integration.hyperparameters import epde_params
+import gc
 
 def noise_data(data, noise_level):
     # add noise level to the input data
@@ -40,7 +41,7 @@ def burgers_discovery(noise_level, epochs):
     bounds = params["boundary"]
 
     population_size = params["population_size"]
-    training_epochs = params["training_epochs"]
+    training_epochs = epochs
 
     max_deriv_order = params["max_deriv_order"]
     equation_terms_max_number = params["equation_terms_max_number"]
@@ -52,6 +53,7 @@ def burgers_discovery(noise_level, epochs):
     i, max_iter_number = 0, 30
     run_eq_info = []
     while i < max_iter_number:
+        gc.collect()
         noised_data = noise_data(data, noise_level)
 
         epde_search_obj = EpdeSearch(use_solver=use_solver, use_pic=use_pic, boundary=bounds,
@@ -63,7 +65,10 @@ def burgers_discovery(noise_level, epochs):
         else:
             epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
                                              preprocessor_kwargs={"use_smoothing": True})
-
+            # epde_search_obj.set_preprocessor(default_preprocessor_type='FD',
+            #                                  preprocessor_kwargs={})
+            # epde_search_obj.set_preprocessor(default_preprocessor_type='ANN',
+            #                                  preprocessor_kwargs={'epochs_max' : 1e4})
         epde_search_obj.set_moeadd_params(population_size=population_size,
                                           training_epochs=training_epochs)
 
@@ -93,7 +98,7 @@ def burgers_discovery(noise_level, epochs):
 if __name__ == "__main__":
     ''' Parameters of the experiment '''
     epochs = 5
-    noise_level = 0
+    noise_level = 0.00625
     ''''''
 
     burgers_discovery(noise_level=noise_level, epochs=epochs)

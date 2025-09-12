@@ -37,7 +37,7 @@ def kdv_sindy_discovery(noise_level, epochs):
     bounds = params["boundary"]
 
     population_size = params["population_size"]
-    training_epochs = params["training_epochs"]
+    training_epochs = epochs
 
     max_deriv_order = params["max_deriv_order"]
     equation_terms_max_number = params["equation_terms_max_number"]
@@ -61,6 +61,8 @@ def kdv_sindy_discovery(noise_level, epochs):
         else:
             epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
                                              preprocessor_kwargs={"use_smoothing": True})
+            # epde_search_obj.set_preprocessor(default_preprocessor_type='ANN',
+            #                                  preprocessor_kwargs={'epochs_max' : 1e4})
 
         epde_search_obj.set_moeadd_params(population_size=population_size,
                                           training_epochs=training_epochs)
@@ -89,7 +91,7 @@ def kdv_sindy_discovery(noise_level, epochs):
 
 if __name__ == "__main__":
     ''' Parameters of the experiment '''
-    epochs = 25
-    noise_level = 0
+    epochs = 5
+    noise_level = 0.01
     ''''''
     kdv_sindy_discovery(noise_level=noise_level, epochs=epochs)

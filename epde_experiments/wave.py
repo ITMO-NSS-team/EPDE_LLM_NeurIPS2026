@@ -15,10 +15,11 @@ import traceback
 import logging
 import os
 from epde_integration.hyperparameters import epde_params
-from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker
+from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker, FrontReranker
 from epde_eq_parse.eq_parser import clean_parsed_out
 from epde.interface.interface import EpdeSearch
 from epde_integration.hyperparameters import epde_params
+import gc
 
 def noise_data(data, noise_level):
     # add noise level to the input data
@@ -38,6 +39,7 @@ def wave_data():
 def wave_discovery(noise_level, epochs):
     data, grid = wave_data()
     dir_name = "wave"
+    experiment_info = "noise_" + str(noise_level) + "_epochs_" + str(epochs)
 
     i = 0
     max_iter_number = 30
@@ -51,7 +53,7 @@ def wave_discovery(noise_level, epochs):
     bounds = params["boundary"]
 
     population_size = params["population_size"]
-    training_epochs = params["training_epochs"]
+    training_epochs = epochs
 
     max_deriv_order = params["max_deriv_order"]
     equation_terms_max_number = params["equation_terms_max_number"]
@@ -61,6 +63,7 @@ def wave_discovery(noise_level, epochs):
     eq_sparsity_interval = params["eq_sparsity_interval"]
 
     while i < max_iter_number:
+        gc.collect()
         noised_data = noise_data(data, noise_level)
         epde_search_obj = EpdeSearch(use_solver=use_solver, use_pic=use_pic,
                                      boundary=bounds,
@@ -72,6 +75,8 @@ def wave_discovery(noise_level, epochs):
         else:
             epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
                                              preprocessor_kwargs={"use_smoothing": True})
+            # epde_search_obj.set_preprocessor(default_preprocessor_type='ANN',
+            #                                  preprocessor_kwargs={'epochs_max' : 1e4})
 
         epde_search_obj.set_moeadd_params(population_size=population_size,
                                           training_epochs=training_epochs)
@@ -83,27 +88,25 @@ def wave_discovery(noise_level, epochs):
                             equation_factors_max_number=equation_factors_max_number,
                             eq_sparsity_interval=eq_sparsity_interval) # , data_nn=data_nn
         end = time.time()
-        end = time.time()
         epde_search_obj.equations(only_print=True, only_str=False, num=1)
+        np.save('ds', epde_search_obj._derivatives)
         res = epde_search_obj.equations(only_print=False, only_str=False, num=1)
         iter_info = evaluate_fronts(res, dir_name, end - start, i)
-        run_eq_info += iter_info
-
-        time1 = end - start
-        print('Overall time is:', time1)
-        print(f'Iteration processed: {i + 1}/{max_iter_number}\n')
+        front_r = FrontReranker(iter_info)
+        run_eq_info.append(front_r.select_best('shd'))
+        # run_eq_info += iter_info
         i += 1
-
+        print(f"Iter #{i}/{max_iter_number} completed")
+        print(f"Time spent: {(end - start) / 60} min")
     eq_r = EqReranker(run_eq_info, dir_name)
-    best_info = eq_r.select_best('shd')
-    experiment_info = "noise_" + str(noise_level) + "_epochs_" + str(epochs)
+    eq_r.best_run_inf = run_eq_info
     eq_r.to_csv(package="epde_experiments", experiment_info=experiment_info)
     print()
 
 if __name__ == '__main__':
     ''' Parameters of the experiment '''
     epochs = 5
-    noise_level = 0
+    noise_level = 50000000
     ''''''
     wave_discovery(noise_level=noise_level, epochs=epochs)
 
