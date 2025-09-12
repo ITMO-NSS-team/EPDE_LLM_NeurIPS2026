@@ -55,6 +55,17 @@ def get_data(dataset):
         x = np.linspace(0, 1, 101)
         grids = np.meshgrid(t, x, indexing='ij')
 
+    elif dataset == "ode":
+        base_path = Path().absolute().parent
+        path_full = os.path.join(base_path, "data_ode", "ode.npy")
+        u = np.load(path_full)
+        u = np.transpose(u)
+        step = 0.05
+        steps_num = 320
+        t = np.arange(start = 0., stop = step * steps_num, step = step)
+        x = None
+        grids = np.meshgrid(t, x, indexing='ij')
+
     return grids, u, x, t
 
 
@@ -76,7 +87,7 @@ def gen_derivs(noise_level, dataset, i=None):
                                  coordinate_tensors=grid, device='cuda')
 
     if noise_level == 0:
-        epde_search_obj.set_preprocessor(default_preprocessor_type='FD',
+        epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
                                          preprocessor_kwargs={})
     else:
         epde_search_obj.set_preprocessor(default_preprocessor_type='poly',
@@ -87,8 +98,10 @@ def gen_derivs(noise_level, dataset, i=None):
                                 additional_tokens=[])
     derivs = epde_search_obj._derivatives
 
+    np.save(os.path.join(full_path, "ds"), [derivs['u']])
     np.save(os.path.join(full_path, "u"), noised_data)
-    np.save(os.path.join(full_path, "x"), x)
+    if x is not None:
+        np.save(os.path.join(full_path, "x"), x)
     np.save(os.path.join(full_path, "t"), t)
 
     if noise_level == 0:
@@ -97,30 +110,30 @@ def gen_derivs(noise_level, dataset, i=None):
                 np.save(os.path.join(full_path, "du_dx1"), derivs['u'][:, i].reshape(data.shape))
             else:
                 np.save(os.path.join(full_path, f"d^{i+1}u_dx1^{i+1}"), derivs['u'][:, i].reshape(data.shape))
-
-        for i in range(x_deriv_order):
-            if i == 0:
-                np.save(os.path.join(full_path, "du_dx2"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
-            else:
-                np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
+        if x is not None:
+            for i in range(x_deriv_order):
+                if i == 0:
+                    np.save(os.path.join(full_path, "du_dx2"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
+                else:
+                    np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
     else:
         for i in range(t_deriv_order):
             if i == 0:
                 np.save(os.path.join(full_path, "du_dx1"), derivs['u'][:, i].reshape(data.shape))
             else:
                 np.save(os.path.join(full_path, f"d^{i+1}u_dx1^{i+1}"), derivs['u'][:, i].reshape(data.shape))
-
-        for i in range(x_deriv_order):
-            if i == 0:
-                np.save(os.path.join(full_path, "du_dx2"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
-            else:
-                np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
+        if x is not None:
+            for i in range(x_deriv_order):
+                if i == 0:
+                    np.save(os.path.join(full_path, "du_dx2"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
+                else:
+                    np.save(os.path.join(full_path, f"d^{i+1}u_dx2^{i+1}"), derivs['u'][:, i + t_deriv_order].reshape(data.shape))
 
 if __name__ == "__main__":
     noise_level = 0
     single = True
     iters = 30
-    datasets = ["burg", "burg_sindy", "kdv_sindy", "wave"]
+    datasets = ["burg", "burg_sindy", "kdv_sindy", "wave", "ode"]
 
     for dataset in datasets:
         if noise_level == 0 or single:
