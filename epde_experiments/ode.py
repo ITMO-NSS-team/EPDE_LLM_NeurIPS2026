@@ -15,7 +15,7 @@ import traceback
 import logging
 import os
 from epde_integration.hyperparameters import epde_params
-from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker
+from epde_eq_parse.eq_evaluator import evaluate_fronts, EqReranker, FrontReranker
 from epde_eq_parse.eq_parser import clean_parsed_out
 from epde.interface.interface import EpdeSearch
 from epde_integration.hyperparameters import epde_params
@@ -39,10 +39,9 @@ def ode_data():
 def ode_discovery(noise_level, epochs):
     data, grid = ode_data()
     dir_name = "ode"
-
+    experiment_info = "noise_" + str(noise_level) + "_epochs_" + str(epochs)
     i = 0
     max_iter_number = 30
-    # clean_parsed_out('wave')
     run_eq_info = []
 
     params = epde_params[dir_name]
@@ -87,26 +86,23 @@ def ode_discovery(noise_level, epochs):
                             equation_factors_max_number=equation_factors_max_number,
                             eq_sparsity_interval=eq_sparsity_interval) # , data_nn=data_nn
         end = time.time()
-        epde_search_obj.equations(only_print=True, only_str=False, num=1)
+
+        epde_search_obj.equations(only_print=True, num=1)
         res = epde_search_obj.equations(only_print=False, only_str=False, num=1)
         iter_info = evaluate_fronts(res, dir_name, end - start, i)
-        run_eq_info += iter_info
-
-        time1 = end - start
-        print('Overall time is:', time1)
-        print(f'Iteration processed: {i + 1}/{max_iter_number}\n')
+        front_r = FrontReranker(iter_info)
+        run_eq_info.append(front_r.select_best('shd'))
         i += 1
-
+        print(f"Iter #{i}/{max_iter_number} completed")
+        print(f"Time spent: {(end-start)/60} min")
     eq_r = EqReranker(run_eq_info, dir_name)
-    best_info = eq_r.select_best('shd')
-    experiment_info = "noise_" + str(noise_level) + "_epochs_" + str(epochs)
+    eq_r.best_run_inf = run_eq_info
     eq_r.to_csv(package="epde_experiments", experiment_info=experiment_info)
-    print()
 
 if __name__ == '__main__':
     ''' Parameters of the experiment '''
     epochs = 5
-    noise_level = 0
+    noise_level = 0.005
     ''''''
     ode_discovery(noise_level=noise_level, epochs=epochs)
 

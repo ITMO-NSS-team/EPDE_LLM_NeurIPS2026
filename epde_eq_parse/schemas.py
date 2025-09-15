@@ -19,9 +19,9 @@ class OdeSch(object):
     schema = frozenset({'du/dx0', 'u', 'x_0', 'd^2u/dx0^2', 'C'})
     correct_params1 = {'du/dx0': -1.0, 'u': 4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
     correct_params2 = {'du/dx0': 1.0, 'u': -4.0, 'x_0': -1.5, 'd^2u/dx0^2': 1.0, 'C': 0.0}
-    # correct_params3 = {'du/dx0': -1.0, 'u': 4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
-    # correct_params4 = {'du/dx0': -1.0, 'u': 4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
-    params = [correct_params1, correct_params2] # , correct_params3, correct_params4
+    correct_params3 = {'du/dx0': 1.0, 'u': 4.0, 'x_0': -1.5, 'd^2u/dx0^2': 1.0, 'C': 0.0}
+    correct_params4 = {'du/dx0': -1.0, 'u': -4.0, 'x_0': 1.5, 'd^2u/dx0^2': -1.0, 'C': 0.0}
+    params = [correct_params1, correct_params2, correct_params3, correct_params4] # 
 
 
 class BurgSch(object):

@@ -39,8 +39,13 @@ def get_terms(eq_str):
 
     terms = left.split('} + ')
     remove_power_pattern = r'\{power: \d+\.\d+\}?'
+    remove_dim_pattern = r', dim: \d+\.\d'
     for i in range(len(terms)):
         terms[i] = re.sub(remove_power_pattern, '', terms[i])
+        try:
+            terms[i] = re.sub(remove_dim_pattern, '', terms[i])
+        except:
+            continue
     right = re.sub(remove_power_pattern, '', right)
     return terms, right
 
