@@ -49,10 +49,10 @@ class OptManager:
         if self.start_iter == 0:
             while True:
                 try:
-                    create_llm_iter_n_folders(self.llm_iter)
+                    create_llm_iter_n_folders(llm_iter=self.llm_iter, dir_name=self.data_args["dir_name"], noise_level=self.data_args["noise_level"])
                     if not self.debug:
-                        clean_output_dir(self.llm_iter)
-                    reset_prompt_to_init(self.llm_iter)
+                        clean_output_dir(llm_iter=self.llm_iter, dir_name=self.data_args["dir_name"], noise_level=self.data_args["noise_level"])
+                    reset_prompt_to_init(llm_iter=self.llm_iter, dir_name=self.data_args["dir_name"], noise_level=self.data_args["noise_level"])
 
                     new_prompt, score, str_equation, params = self.perform_step(file_name="zero-iter.txt", num=0)
                     self.start_iter = 1
@@ -84,5 +84,7 @@ class OptManager:
                                     noise_level=self.data_args["noise_level"], print_info=False)
         score, eq_string, params = self.evaluator.llm_response_eval(response, self.eq_buffer)
         new_prompt, old_prompt = rebuild_prompt(eq_string, score, response, num=num,
+                                                dir_name=self.data_args["dir_name"],
+                                                noise_level=self.data_args["noise_level"],
                                                 llm_iter=self.llm_iter, file_name=file_name)
         return new_prompt, score, eq_string, params

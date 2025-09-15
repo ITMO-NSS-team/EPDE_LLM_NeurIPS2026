@@ -40,7 +40,7 @@ def get_response(file_name="continue-iter.txt", llm_iter=0, num=0, dir_name='bur
     )
 
     if file_name != "zero-iter.txt":
-        prompt_path = os.path.join(PARENT_PATH, "pipeline", "prompts", f"llm_iter_{llm_iter}", file_name)
+        prompt_path = os.path.join(PARENT_PATH, "pipeline", "prompts", dir_name, f"noise_level_{noise_level}", f"llm_iter_{llm_iter}", file_name)
     else:
         prompt_path = os.path.join(PARENT_PATH, "pipeline", "prompts", file_name)
 
@@ -67,7 +67,7 @@ def get_response(file_name="continue-iter.txt", llm_iter=0, num=0, dir_name='bur
         print("Response:", response)
         info(prompt, response, response_big)
 
-    write_path = os.path.join(PARENT_PATH, "pipeline", "debug_llm_outputs", f"llm_iter_{llm_iter}",  f"out_{num}.txt")
+    write_path = os.path.join(PARENT_PATH, "pipeline", "debug_llm_outputs", dir_name, f"noise_level_{noise_level}", f"llm_iter_{llm_iter}",  f"out_{num}.txt")
     with open(write_path, 'w', encoding="utf-8") as model_out:
         model_out.write(response)
     return response

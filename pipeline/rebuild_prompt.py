@@ -94,7 +94,7 @@ def retrieve_copy_exp_buff(next_path, copy_from, num):
         return start_pos_next, end_pos_next, dict_str_next, file_content_next
 
 
-def rebuild_prompt(insert_eq_str, value, response, file_name="continue-iter.txt", llm_iter=0, num=0):
+def rebuild_prompt(insert_eq_str, value, response, dir_name, noise_level, file_name="continue-iter.txt", llm_iter=0, num=0):
     '''
         В большинстве случаев path и copy_from совпадают и равны continue-iter.txt,
         в одном случае у нас path равен zero_iter
@@ -105,9 +105,9 @@ def rebuild_prompt(insert_eq_str, value, response, file_name="continue-iter.txt"
     if file_name == 'zero-iter.txt':
         path = os.path.join(PARENT_PATH, "pipeline", "prompts",  file_name)
     else:
-        path = os.path.join(PARENT_PATH, "pipeline", "prompts", f"llm_iter_{llm_iter}", file_name)
+        path = os.path.join(PARENT_PATH, "pipeline", "prompts", dir_name, f"noise_level_{noise_level}", f"llm_iter_{llm_iter}", file_name)
 
-    copy_from = os.path.join(PARENT_PATH, "pipeline", "prompts", f"llm_iter_{llm_iter}",  "continue-iter.txt")
+    copy_from = os.path.join(PARENT_PATH, "pipeline", "prompts", dir_name, f"noise_level_{noise_level}", f"llm_iter_{llm_iter}",  "continue-iter.txt")
     start_pos, end_pos, dict_str, file_content = retrieve_copy_exp_buff(next_path=path,
                                                                         copy_from=copy_from,
                                                                         num=num)
@@ -117,7 +117,7 @@ def rebuild_prompt(insert_eq_str, value, response, file_name="continue-iter.txt"
 
     new_dict_str = insert_equation(insert_eq_str, value, dict_str)
 
-    path = os.path.join(PARENT_PATH, "pipeline", "prompts", f"llm_iter_{llm_iter}", "continue-iter.txt")
+    path = os.path.join(PARENT_PATH, "pipeline", "prompts", dir_name, f"noise_level_{noise_level}", f"llm_iter_{llm_iter}", "continue-iter.txt")
     new_file = create_new_file(start_pos, end_pos, new_dict_str, response, file_content, path, write_file=True, num=num)
     return new_file, file_content
 
