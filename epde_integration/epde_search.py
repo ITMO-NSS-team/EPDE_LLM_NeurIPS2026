@@ -43,6 +43,7 @@ class EpdeSearcher(object):
         self.pool = None
         self.extra_tokens = None
         self.derivs = np.load(f'../data/noise_level_{self.noise_level}/{self._dir_name}/ds.npy', allow_pickle=True)
+        self.start = start
 
     def __get_max_deriv_order(self):
         max_t = max(epde_params[self._dir_name]['max_deriv_order'][0], self.llm_pool.max_deriv_orders['max_deriv_t'])
@@ -61,7 +62,7 @@ class EpdeSearcher(object):
         clean_parsed_out(self._dir_name)
         run_eq_info = []
         while i < self.__max_iter:
-            start = start
+            start = self.start
             
             # epde/interface/interface.py line 743
             self.epde_search_obj.fit(data=self.u, max_deriv_order=self.__get_max_deriv_order(),
