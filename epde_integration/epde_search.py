@@ -24,7 +24,7 @@ def get_epde_search_obj(grids, dir_name, device='cpu'):
 class EpdeSearcher(object):
     # если нужны деривы, то передать вот тут в инит
     def __init__(self, data: list, record_track: dict, pruned_track: dict, dir_name: str,
-                 use_init_population=True, max_iter_num=1, device: str = 'cpu', noise_level=0):
+                 use_init_population=True, max_iter_num=1, device: str = 'cpu', noise_level=0, start=0):
         self.noise_level = noise_level
         self.__max_iter = max_iter_num
         self.use_init_population = use_init_population
@@ -61,7 +61,7 @@ class EpdeSearcher(object):
         clean_parsed_out(self._dir_name)
         run_eq_info = []
         while i < self.__max_iter:
-            start = time.time()
+            start = start
             
             # epde/interface/interface.py line 743
             self.epde_search_obj.fit(data=self.u, max_deriv_order=self.__get_max_deriv_order(),

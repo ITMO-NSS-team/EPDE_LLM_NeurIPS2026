@@ -11,10 +11,10 @@ import time
 
 
 llm_iter_num = 0
-max_iter = 6
+max_iter = 30
 start_iter = 0
 refine_point = 100
-epde_llm_iterations = 2
+epde_llm_iterations = 30
 
 debug = False # True False
 print_exc = True
@@ -23,7 +23,7 @@ exit_code = False
 data_args = {"resample_shape": (20, 20),
              "use_cached": False,
              "noise_level": 0,
-             "dir_name": "wave"}
+             "dir_name": "kdv_sindy"}
 
 
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         full_records_track = opt_manager.eq_buffer.full_records_track
         data = opt_manager.evaluator.data['inputs'] # "inputs": [raw_data['t'], raw_data['x'], raw_data['u']]
         epde_searcher = EpdeSearcher(data, full_records_track, pruned_track, data_args['dir_name'], use_init_population=True,
-                                        max_iter_num=1, device='cuda', noise_level=data_args["noise_level"])
+                                        max_iter_num=1, device='cuda', noise_level=data_args["noise_level"], start=t1)
         run_eq_info.append(epde_searcher.fit())
         t2 = time.time()
         print(f"Iter #{epde_llm_iteration + 1}/{epde_llm_iterations} completed")
