@@ -76,11 +76,8 @@ class EqEvaluator(object):
                 if self.correct_coeffs[key] != 0:
                     mae1 += np.fabs(self.correct_coeffs[key] - self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
                     mae2 += np.fabs(-self.correct_coeffs[key] - self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
-            else:
-                mae1 += np.fabs(self.terms_with_coeffs[key]) / 1e-8
-                mae2 += np.fabs(-self.terms_with_coeffs[key]) / 1e-8
         mae = min(mae1, mae2)
-        return mae / len(self.terms_with_coeffs)
+        return mae / len(self.correct_coeffs)
 
 class FrontReranker(object):
     def __init__(self, iter_info: list[EqInfo]):
