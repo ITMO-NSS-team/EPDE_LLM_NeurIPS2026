@@ -126,20 +126,18 @@ class EpdeSearcher(object):
         max_terms_number = max(epde_params[self._dir_name]['equation_terms_max_number'], self.llm_pool.terms_max_num)
         min_terms_number = np.inf
         self.extra_tokens = []
-        print("Equations suggested by LLM:")
+        # print("Equations suggested by LLM:")
         for i, eq_u in enumerate(self.__eq_epde_str):
             try:
-                print(eq_u)
                 soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
                 if soeqs.metaparameters["terms_number"]["value"] > max_terms_number:
                     max_terms_number = soeqs.metaparameters["terms_number"]["value"]
                 if soeqs.metaparameters["terms_number"]["value"] < min_terms_number:
                     min_terms_number = soeqs.metaparameters["terms_number"]["value"]
             except:
-                print("No such family in pool!")
                 continue
         for i in range(max_terms_number - min_terms_number):            
-            noise = np.random.normal(size=self.u.shape)
+            noise = np.random.normal(size=self.u.shape, scale=1e10)
             custom_noise_tokens = CacheStoredTokens(token_type=f'noise_{i}',
                                                 token_labels=[f'noise_term_{i}'],
                                                 token_tensors={f'noise_term_{i}': noise},
@@ -156,20 +154,24 @@ class EpdeSearcher(object):
                                                               self.llm_pool.max_deriv_pow['data_fun_pow']),
                                              deriv_fun_pow=max(1, self.llm_pool.max_deriv_pow['deriv_fun_pow']),
                                              derivs=self.derivs)
-
+        print("Initial population:")
         for i, eq_u in enumerate(self.__eq_epde_str):
             try:
+                bad_eq = False
                 soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
-                for term in soeqs.structure:
-                    if soeqs.structure.count(term) > 1:
-                        continue
-                if soeqs.metaparameters["terms_number"]["value"] < max_terms_number:
-                    for j in range(max_terms_number - soeqs.metaparameters["terms_number"]["value"]):
-                        eq_u = "0.0 * " + self.extra_tokens[j].token_family.tokens[0] + "{power: 1.0} + " + eq_u
-                    soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
-                if soeqs not in self.population:
-                    self.population.append(soeqs)
-                if len(self.population) == epde_params[self._dir_name]['population_size']:
-                    break
-            except:
+                for eqution in soeqs:
+                    for term in eqution.structure:
+                        if eqution.structure.count(term) > 1:
+                            bad_eq = True
+                if not bad_eq:
+                    if soeqs.metaparameters["terms_number"]["value"] < max_terms_number:
+                        for j in range(max_terms_number - soeqs.metaparameters["terms_number"]["value"]):
+                            eq_u = "0.0 * " + self.extra_tokens[j].token_family.tokens[0] + "{power: 1.0} + " + eq_u
+                        soeqs = translate_equation(eq_u, pool=self.epde_search_obj.pool, all_vars=['u', ])
+                    if soeqs.metaparameters["terms_number"]["value"] == max_terms_number:
+                        self.population.append(soeqs)
+                        print(eq_u)
+                    if len(self.population) == epde_params[self._dir_name]['population_size']:
+                        break
+            except IndexError:
                 pass
