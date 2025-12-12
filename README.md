@@ -23,7 +23,7 @@ Discovering the underlying equations from observed data is a fundamental scienti
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/ITMO-NSS-team/EPDE_LLM.git
+    git clone https://github.com/ITMO-NSS-team/EPDE_LLM_NeurIPS2026.git
     ```
 
 2.  **Create and activate a Conda environment:**
