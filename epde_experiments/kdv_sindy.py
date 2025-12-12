@@ -10,6 +10,7 @@ from epde.interface.prepared_tokens import CustomTokens, CustomEvaluator
 from epde.interface.interface import EpdeSearch
 import scipy.io as scio
 from epde_integration.hyperparameters import epde_params
+from epde.interface.equation_translator import translate_equation
 
 
 def noise_data(data, noise_level):
@@ -68,6 +69,12 @@ def kdv_sindy_discovery(noise_level, epochs):
                                           training_epochs=training_epochs)
 
         start = time.time()
+        # epde_search_obj.create_pool(data=noised_data, variable_names=['u', ], max_deriv_order=max_deriv_order,
+        #                     data_fun_pow=data_fun_pow,
+        #                     )
+        # pool = epde_search_obj.pool
+        # eq_u = "0.0 * du/dx0{power: 1.0} + -0.9999757731380657 * d^2u/dx0^2{power: 1.0} * du/dx0{power: 1.0} + 0.0 * du/dx1{power: 1.0} + 0.0 * d^3u/dx1^3{power: 1.0} + 9.120904322256571e-07 = du/dx1{power: 1.0} * d^2u/dx0^2{power: 1.0}"
+        # soeq = translate_equation(eq_u, pool=pool, all_vars=['u', ])
         epde_search_obj.fit(data=noised_data, variable_names=['u', ], max_deriv_order=max_deriv_order,
                             equation_terms_max_number=equation_terms_max_number, data_fun_pow=data_fun_pow,
                             additional_tokens=additional_tokens,
@@ -92,6 +99,6 @@ def kdv_sindy_discovery(noise_level, epochs):
 if __name__ == "__main__":
     ''' Parameters of the experiment '''
     epochs = 5
-    noise_level = 0.01
+    noise_level = 0
     ''''''
     kdv_sindy_discovery(noise_level=noise_level, epochs=epochs)

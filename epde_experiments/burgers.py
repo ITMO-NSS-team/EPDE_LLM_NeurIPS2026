@@ -98,7 +98,7 @@ def burgers_discovery(noise_level, epochs):
 if __name__ == "__main__":
     ''' Parameters of the experiment '''
     epochs = 5
-    noise_level = 0.00625
+    noise_level = 0
     ''''''
 
     burgers_discovery(noise_level=noise_level, epochs=epochs)

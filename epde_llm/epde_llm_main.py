@@ -11,7 +11,7 @@ import time
 
 
 llm_iter_num = 0
-max_iter = 30
+max_iter = 6
 start_iter = 0
 refine_point = 100
 epde_llm_iterations = 30
@@ -20,10 +20,10 @@ debug = False # True False
 print_exc = True
 exit_code = False
 
-data_args = {"resample_shape": (20, 20),
+data_args = {"resample_shape": (1, 1),
              "use_cached": False,
              "noise_level": 0,
-             "dir_name": "kdv_sindy"}
+             "dir_name": "burg"}
 
 
 

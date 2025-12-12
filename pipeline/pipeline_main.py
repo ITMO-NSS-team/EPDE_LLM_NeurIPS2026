@@ -9,12 +9,12 @@ import time
 import traceback
 import re
 
-max_llm_run = 1
-max_iter = 3
+max_llm_run = 30
+max_iter = 6
 start_iter = 0
 refine_point = 100
 
-data_args = {"resample_shape": (20, 20),
+data_args = {"resample_shape": (1, 1),
              "use_cached": False,
              "noise_level": 0,
              "dir_name": "burg"}
