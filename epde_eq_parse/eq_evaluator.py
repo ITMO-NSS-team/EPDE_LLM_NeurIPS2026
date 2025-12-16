@@ -161,6 +161,7 @@ class EqReranker(object):
     def to_csv(self, package="epde_eq_parse", experiment_info="test"):
         header = ['mae', 'mae_norm', 'shd', 'runtime']
         file_path = os.path.join(PARENT_PATH, package, "metrics", f'{self.dir_name}_metrics_{experiment_info}.csv',)
+        os.makedirs(os.path.join(PARENT_PATH, package, "metrics"), exist_ok=True)
 
         with open(file_path, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
