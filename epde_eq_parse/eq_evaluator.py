@@ -22,40 +22,32 @@ class EqInfo(object):
 
 
 class EqEvaluator(object):
-    def __init__(self, dir_name, terms_with_coeffs):
+    def __init__(self, dir_name, terms_with_coeffs, right=''):
         self.dir_name = dir_name
         self.terms_with_coeffs = terms_with_coeffs
+        self.right = right
         self.is_correct_schema = check_schema(schemas[dir_name]['schema'], terms_with_coeffs)
 
-        correct_cfs_set = schemas[dir_name]['params']
-        idx = self.get_correct_coeffs_idx(correct_cfs_set)
-        self.correct_coeffs = correct_cfs_set[idx]
-
-    def get_correct_coeffs_idx(self, correct_cfs_set):
-        coeff_idx, min_diff = 0, 1000000
-        for i, coeff_set in enumerate(correct_cfs_set):
-            coeff_difference = 0.0
-            overall_key_set = set(coeff_set.keys()).union(set(self.terms_with_coeffs.keys()))
-            for key in overall_key_set:
-                coeff_difference += np.fabs(coeff_set.get(key, 0.0) - self.terms_with_coeffs.get(key, 0.0))
-
-            if coeff_difference < min_diff:
-                min_diff = coeff_difference
-                coeff_idx = i
-        return coeff_idx
+        self.correct_coeffs = schemas[dir_name]['params']
 
     def eval_mae(self, eval_incorrect_eq=False):
+        if self.right != '' and self.right in self.correct_coeffs:
+            # У right коэффициент всегда -1
+            # Приводим коэффициенты уравнения к correct_coeffs, опираясь на right
+            # coeff - коэффициент, на который домножается terms_with_coeffs
+            coeff = (-1) * self.correct_coeffs[self.right]
+        else:
+            coeff = 1
+
         if self.is_correct_schema:
-            mae1, mae2 = 0.0, 0.0
+            mae = 0.0
             for key in self.terms_with_coeffs.keys():
-                mae1 += np.fabs(self.correct_coeffs.get(key, 0.0) - self.terms_with_coeffs[key])
-                mae2 += np.fabs(-self.correct_coeffs.get(key, 0.0) - self.terms_with_coeffs[key])
-            mae = min(mae1, mae2)
+                mae += np.fabs(self.correct_coeffs.get(key, 0.0) - coeff * self.terms_with_coeffs[key])
             return mae / len(self.terms_with_coeffs)
         elif eval_incorrect_eq:
-            mae = 0.
+            mae = 0.0
             for key in self.terms_with_coeffs.keys():
-                mae += np.fabs(self.terms_with_coeffs.get(key, 0.0) - self.correct_coeffs.get(key, 0.0))
+                mae += np.fabs(self.correct_coeffs.get(key, 0.0) - coeff * self.terms_with_coeffs.get(key, 0.0))
             return mae / len(self.terms_with_coeffs) if self.terms_with_coeffs['C'] > 0.000000001 else (
                    mae / (len(self.terms_with_coeffs) - 1))
         return None
@@ -70,13 +62,16 @@ class EqEvaluator(object):
         return shd
 
     def eval_mae_norm(self, eval_incorrect_eq=False):
-        mae1, mae2 = 0.0, 0.0
+        if self.right != '' and self.right in self.correct_coeffs:
+            coeff = (-1) * self.correct_coeffs[self.right]
+        else:
+            coeff = 1
+
+        mae = 0.0
         for key in self.terms_with_coeffs.keys():
             if key in set(self.correct_coeffs.keys()):
                 if self.correct_coeffs[key] != 0:
-                    mae1 += np.fabs(self.correct_coeffs[key] - self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
-                    mae2 += np.fabs(-self.correct_coeffs[key] - self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
-        mae = min(mae1, mae2)
+                    mae += np.fabs(self.correct_coeffs[key] - coeff * self.terms_with_coeffs[key]) / abs(self.correct_coeffs[key])
         return mae / len(self.correct_coeffs)
 
 class FrontReranker(object):
@@ -187,7 +182,7 @@ def evaluate_fronts(pareto_fronts, dir_name, runtime, iter_num):
             resolve_ambiguity(terms_with_coeffs)
             is_correct_schema = check_schema(schemas[dir_name]['schema'], terms_with_coeffs)
             if is_correct_schema:
-                eq_eval = EqEvaluator(dir_name, terms_with_coeffs)
+                eq_eval = EqEvaluator(dir_name, terms_with_coeffs, right)
                 mae = eq_eval.eval_mae()
                 shd = eq_eval.eval_shd()
                 mae_norm = eq_eval.eval_mae_norm()
